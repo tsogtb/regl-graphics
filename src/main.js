@@ -1,9 +1,9 @@
 import createREGL from "https://esm.sh/regl"
 import { Camera } from "./camera.js"
-import { createRenderer } from "./renderer.js"
+import { createRenderer } from "./point_renderer.js"
 import { createScene, createStarData } from "./scene.js"
 
-const canvas = document.getElementById("c")
+const canvas = document.getElementById("c");
 
 const regl = createREGL({ 
     canvas,
@@ -11,34 +11,46 @@ const regl = createREGL({
         antialias: true,
         alpha: false, 
         preserveDrawingBuffer: false,
-        powerPreference: "high-performance"
-    }
-})
+        powerPreference: "high-performance",
+    },
+});
 
 function resize() {
-    const dpr = window.devicePixelRatio || 1
+    const dpr = window.devicePixelRatio || 1;
     
-    const width = window.innerWidth
-    const height = window.innerHeight
+    const width = window.innerWidth;
+    const height = window.innerHeight;
     
-    canvas.width = width * dpr
-    canvas.height = height * dpr
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
   
-    canvas.style.width = `${width}px`
-    canvas.style.height = `${height}px`
-}
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+};
 
 window.addEventListener("resize", resize)
 resize()
 
-const camera = new Camera(canvas)
-let starData = createStarData(regl)
+const camera = new Camera(canvas);
+
+let data = createData(regl)
+
+function goNext() {
+  currentSceneIndex = (currentSceneIndex + 1) % scenes.length
+  loadScene(currentSceneIndex)
+}
+
+document.getElementById("next").addEventListener("click", () => {
+document.addEventListener("keydown", (event) => {
+  if (event.key === "n" || event.key === "N") {
+    goNext();
+  }
+});
 
 
 const scene = createScene()
 let render = createRenderer(regl, starData)
 
-document.getElementById("regen").addEventListener("click", () => {
   
   starData.buffer.destroy()
   starData.colorBuffer.destroy()
