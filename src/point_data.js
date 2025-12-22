@@ -2,6 +2,48 @@
  * point_data.js
  */
 
+const DEFAULT_PASSIVE_COUNT = 1000000;
+
+const STAR_PALETTE = [
+  [1.0, 0.85, 0.7],
+  [1.0, 0.4, 0.2],
+  [0.5, 0.7, 1.0],
+  [1.0, 1.0, 1.0],
+  [1.0, 0.95, 0.4],
+];
+
+const getRandomColor = () => STAR_PALETTE[Math.floor(Math.random() * STAR_PALETTE.length)];
+
+const getStarRadius = () => (
+  Math.random() > 0.2 
+    ? 50 + Math.random() * 100 
+    : 3 + Math.random() * 50
+);
+
+
+function fillPassivePoints(positions, colors) {
+  const count = positions.length / 3;
+
+  for (let i = 0; i < count; i++) {
+    const idx = i * 3;
+    
+    const theta = Math.random() * 2 * Math.PI;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const r = getStarRadius();
+
+    positions[idx]     = r * Math.sin(phi) * Math.cos(theta);
+    positions[idx + 1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[idx + 2] = r * Math.cos(phi);
+
+    const [rc, gc, bc] = getRandomColor();
+    const brightness = 0.4 + Math.random() * 0.6;
+
+    colors[idx]     = rc * brightness;
+    colors[idx + 1] = gc * brightness;
+    colors[idx + 2] = bc * brightness;
+  }
+}
+
 export function createPointData(regl, {
   passive = false,
   samplers = [], 
@@ -50,42 +92,3 @@ export function createPointData(regl, {
     count: totalPoints,
   };
 }
-
-const DEFAULT_PASSIVE_COUNT = 100_000;
-
-const STAR_PALETTE = [
-  [1.0, 0.85, 0.7],
-  [1.0, 0.4, 0.2],
-  [0.5, 0.7, 1.0],
-  [1.0, 1.0, 1.0],
-  [1.0, 0.95, 0.4],
-];
-
-const getRandomColor = () => STAR_PALETTE[Math.floor(Math.random() * STAR_PALETTE.length)];
-
-function fillPassivePoints(positions, colors) {
-  const count = positions.length / 3;
-
-  for (let i = 0; i < count; i++) {
-    const idx = i * 3;
-    
-    const theta = Math.random() * 2 * Math.PI;
-    const phi = Math.acos(2 * Math.random() - 1);
-    const r = getStarRadius();
-
-    positions[idx]     = r * Math.sin(phi) * Math.cos(theta);
-    positions[idx + 1] = r * Math.sin(phi) * Math.sin(theta);
-    positions[idx + 2] = r * Math.cos(phi);
-
-    const [rc, gc, bc] = getRandomColor();
-    colors[idx]     = rc;
-    colors[idx + 1] = gc;
-    colors[idx + 2] = bc;
-  }
-}
-
-const getStarRadius = () => (
-  Math.random() > 0.2 
-    ? 50 + Math.random() * 100 
-    : 3 + Math.random() * 50
-);
