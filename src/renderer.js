@@ -2,12 +2,6 @@
  * renderer.js
  * 
  * Renderer for point clouds and background gradient.
- * - Points: renders a set of points with color attributes and time-based effects
- * - Background: renders a simple full-screen gradient
- * 
- * Usage:
- * const render = createPointRenderer(regl, pointData);
- * render(camera, time);
  */
 
 import point_vert from "./shaders/point.vert.js";
