@@ -1,19 +1,48 @@
 /**
  * point_data.js
- *
- * Generates point cloud data for REGL rendering.
- * Supports passive background points or clustered shapes.
  */
 
-export function createPointData(regl, { passive = true, clusters = [] } = {}) {
-  const totalPoints = passive
-    ? DEFAULT_PASSIVE_COUNT
-    : clusters.reduce((sum, c) => sum + (c.num_points || 0), 0);
+export function createPointData(regl, {
+  passive = false,
+  samplers = [], 
+  counts = [],
+} = {}) {
 
-  const positions = new Float32Array(totalPoints * 3);
-  const colors = new Float32Array(totalPoints * 3);
+  let totalPoints = 0;
+  let positions, colors;
 
-  passive ? fillPassivePoints(positions, colors) : fillClusterPoints(positions, colors, clusters);
+  if (passive) {
+    totalPoints = DEFAULT_PASSIVE_COUNT;
+    positions = new Float32Array(totalPoints * 3);
+    colors = new Float32Array(totalPoints * 3);
+    
+    fillPassivePoints(positions, colors);
+  } else {
+    const activeCount = Math.min(samplers.length, counts.length);
+    totalPoints = counts.reduce((sum, n, i) => i < activeCount ? sum + n : sum, 0);
+    
+    positions = new Float32Array(totalPoints * 3);
+    colors = new Float32Array(totalPoints * 3);
+  
+    let offset = 0;
+    for (let i = 0; i < activeCount; i++) {
+      const sampleFn = samplers[i];
+      const n = counts[i];
+  
+      for (let j = 0; j < n; j++) {
+        const { x, y, z } = sampleFn();
+        const idx = (offset + j) * 3;
+        
+        positions[idx]     = x;
+        positions[idx + 1] = y;
+        positions[idx + 2] = z;
+        
+        // Constant white for active shapes
+        colors[idx] = colors[idx+1] = colors[idx+2] = 1.0;
+      }
+      offset += n;
+    }
+  }
 
   return {
     buffer: regl.buffer(positions),
@@ -23,71 +52,40 @@ export function createPointData(regl, { passive = true, clusters = [] } = {}) {
 }
 
 const DEFAULT_PASSIVE_COUNT = 100_000;
-const BACKGROUND_OFFSET_Z = 5;
+
+const STAR_PALETTE = [
+  [1.0, 0.85, 0.7],
+  [1.0, 0.4, 0.2],
+  [0.5, 0.7, 1.0],
+  [1.0, 1.0, 1.0],
+  [1.0, 0.95, 0.4],
+];
+
+const getRandomColor = () => STAR_PALETTE[Math.floor(Math.random() * STAR_PALETTE.length)];
 
 function fillPassivePoints(positions, colors) {
-  const palette = getPalette();
-  const len = positions.length / 3;
+  const count = positions.length / 3;
 
-  for (let i = 0; i < len; i++) {
+  for (let i = 0; i < count; i++) {
     const idx = i * 3;
+    
     const theta = Math.random() * 2 * Math.PI;
     const phi = Math.acos(2 * Math.random() - 1);
-    const r = getPassiveRadius();
+    const r = getStarRadius();
 
     positions[idx]     = r * Math.sin(phi) * Math.cos(theta);
     positions[idx + 1] = r * Math.sin(phi) * Math.sin(theta);
-    positions[idx + 2] = BACKGROUND_OFFSET_Z + r * Math.cos(phi);
+    positions[idx + 2] = r * Math.cos(phi);
 
-    const c = randomColor(palette);
-    colors[idx]     = c[0];
-    colors[idx + 1] = c[1];
-    colors[idx + 2] = c[2];
+    const [rc, gc, bc] = getRandomColor();
+    colors[idx]     = rc;
+    colors[idx + 1] = gc;
+    colors[idx + 2] = bc;
   }
 }
 
-function fillClusterPoints(positions, colors, clusters) {
-  let offset = 0;
-  const palette = getPalette();
-
-  clusters.forEach(({ num_points, center, radius, color }) => {
-    const baseColor = color || randomColor(palette);
-
-    for (let i = 0; i < num_points; i++) {
-      const idx = (offset + i) * 3;
-      const theta = Math.random() * 2 * Math.PI;
-      const r = radius * Math.sqrt(Math.random());
-
-      positions[idx]     = center.x + r * Math.cos(theta);
-      positions[idx + 1] = center.y + r * Math.sin(theta);
-      positions[idx + 2] = center.z;
-
-      const brightness = 0.5 + Math.random() * 0.5;
-      colors[idx]     = baseColor[0] * brightness;
-      colors[idx + 1] = baseColor[1] * brightness;
-      colors[idx + 2] = baseColor[2] * brightness;
-    }
-
-    offset += num_points;
-  });
-}
-
-function getPalette() {
-  return [
-    [1.0, 0.85, 0.7],
-    [1.0, 0.4, 0.2],
-    [0.5, 0.7, 1.0],
-    [1.0, 1.0, 1.0],
-    [1.0, 0.95, 0.4],
-  ];
-}
-
-function randomColor(palette) {
-  return palette[Math.floor(Math.random() * palette.length)];
-}
-
-function getPassiveRadius() {
-  return Math.random() > 0.2
-    ? 50 + Math.random() * 100
-    : 3 + Math.random() * 50;
-}
+const getStarRadius = () => (
+  Math.random() > 0.2 
+    ? 50 + Math.random() * 100 
+    : 3 + Math.random() * 50
+);

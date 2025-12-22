@@ -1,3 +1,8 @@
+/*
+Author: Tsogt
+Created: 12/20/2025
+Last modified: 12/22/2025
+ */
 import createREGL from "https://esm.sh/regl";
 import { Camera } from "./camera.js";
 import { createPointData } from "./point_data.js";

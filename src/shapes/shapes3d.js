@@ -219,45 +219,9 @@ export class SphereSector3D extends EllipsoidSector3D {
 
 
 /**
- * SphereSector3D
- * 
- * Represents a sector (wedge) of a sphere.
- * Provides uniform sampling and point containment methods.
- * Extends EllipsoidSector3D for code reuse.
- * 
- * @example
- * // Create a spherical sector centered at (0,0,0) with radius 2
- * // azimuth 0 to PI/2, polar 0 to PI/3
- * const sector = new SphereSector3D(
- *   { x: 0, y: 0, z: 0 },
- *   2,
- *   0, Math.PI/2,    // azimuth θ
- *   0, Math.PI/3     // polar φ
- * );
- * 
- * const p = sector.sample(); // { x: ..., y: ..., z: ... }
- * const inside = sector.contains({ x: 1, y: 1, z: 0.5 }); // true or false
- */
-export class SphereSector3D extends EllipsoidSector3D {
-  /**
-   * @param {{x: number, y: number, z: number}} center - Center coordinates
-   * @param {number} [radius=1] - Sphere radius
-   * @param {number} [startTheta=0] - Azimuth start angle (around Z axis)
-   * @param {number} [endTheta=2*Math.PI] - Azimuth end angle
-   * @param {number} [startPhi=0] - Polar start angle (from Z axis)
-   * @param {number} [endPhi=Math.PI] - Polar end angle
-   */
-  constructor(center, radius = 1, startTheta = 0, endTheta = 2*Math.PI, startPhi = 0, endPhi = Math.PI) {
-    super(center, radius, radius, radius, startTheta, endTheta, startPhi, endPhi);
-    this.radius = radius;
-  }
-}
-
-
-/**
  * Sphere3D
  * 
- * Represents a filled 3D sphere (special case of ellipsoid) and provides
+ * Represents a filled 3D sphere and provides
  * uniform sampling and point containment methods.
  * 
  * @example

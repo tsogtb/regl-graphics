@@ -1,3 +1,8 @@
+/**
+ * point_data.js
+ *
+ * Firt-person / free-look camera
+ */
 import { mat4, vec3 } from "https://esm.sh/gl-matrix"
 
 const keys = new Set()
@@ -12,7 +17,7 @@ export class Camera {
     this.projection = mat4.create()
     this.view = mat4.create()
 
-    this.position = vec3.fromValues(0, 0, 5)
+    this.position = vec3.fromValues(0, 0, 0)
     this.up = vec3.fromValues(0, 1, 0)
     this.front = vec3.fromValues(0, 0, -1)
     this.right = vec3.fromValues(1, 0, 0)
