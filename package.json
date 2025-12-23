@@ -4,6 +4,9 @@
   "description": "Monte Carlo sampling library inspired by HUDF",
   "type": "module",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
   "keywords": [
     "monte-carlo",
     "geometry",
@@ -23,7 +26,8 @@
     "demo": "npx live-server --open=demo",
     "dev": "npm run demo",
     "test": "vitest",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "stress": "node test/stress.test.js"
   },
   "devDependencies": {
     "vitest": "^4.0.16"
