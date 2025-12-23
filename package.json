@@ -14,10 +14,16 @@
   ],
   "author": "Tsogt Baigalmaa",
   "license": "MIT",
+  "files": [
+    "src",
+    "README.md"
+  ],
   "scripts": {
     "start": "npm run demo",
     "demo": "npx live-server --open=demo",
-    "dev": "npm run demo"
+    "dev": "npm run demo",
+    "test": "vitest",
+    "test:ui": "vitest --ui"
   },
   "devDependencies": {
     "vitest": "^4.0.16"
