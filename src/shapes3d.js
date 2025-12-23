@@ -187,3 +187,63 @@ export class Cone3D {
     };
   }
 }
+
+/**
+ * Cylinder3D
+ * Represents a filled 3D cylinder aligned with the Z-axis.
+ */
+export class Cylinder3D {
+  /**
+   * @param {{x,y,z}} center - Center of the circular base
+   * @param {number} radius - Radius of the cylinder
+   * @param {number} height - Vertical height along +Z
+   */
+  constructor(center, radius = 1, height = 1) {
+    this.center = center;
+    this.radius = radius;
+    this.height = height;
+    
+    /** Volume = π * r² * h */
+    this.volume = Math.PI * radius * radius * height;
+    
+    this.bbox = {
+      minX: center.x - radius, maxX: center.x + radius,
+      minY: center.y - radius, maxY: center.y + radius,
+      minZ: center.z,          maxZ: center.z + height
+    };
+  }
+
+  /**
+   * Check if a point is inside the cylinder.
+   * @param {{x: number, y: number, z: number}} p 
+   * @param {number} [epsilon=1e-9]
+   */
+  contains(p, epsilon = 1e-9) {
+    const dz = p.z - this.center.z;
+    // Check height bounds
+    if (dz < -epsilon || dz > this.height + epsilon) return false;
+    
+    // Check radial bounds (x² + y² <= r²)
+    const dx = p.x - this.center.x;
+    const dy = p.y - this.center.y;
+    return (dx * dx + dy * dy) <= (this.radius * this.radius) + epsilon;
+  }
+
+  /**
+   * Sample a point uniformly inside the cylinder volume.
+   */
+  sample() {
+    // Uniform height distribution (linear)
+    const z = this.center.z + Math.random() * this.height;
+    
+    // Uniform radial distribution (sqrt to account for area scaling)
+    const r = this.radius * Math.sqrt(Math.random());
+    const theta = Math.random() * 2 * Math.PI;
+    
+    return {
+      x: this.center.x + r * Math.cos(theta),
+      y: this.center.y + r * Math.sin(theta),
+      z: z
+    };
+  }
+}

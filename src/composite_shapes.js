@@ -88,23 +88,49 @@ export class CompositeShape {
     }
   }
 
-  /** @private */
-  _calculateBBox() {
-    const shapes = this.shapes;
+/** @private */
+_calculateBBox() {
+  const shapes = this.shapes;
+  if (!shapes.length) return { minX: 0, maxX: 0, minY: 0, maxY: 0, minZ: 0, maxZ: 0 };
+
+  // 1. Normalize the initial bounding box to ensure z-axis exists
+  const initial = {
+    minX: shapes[0].bbox.minX,
+    maxX: shapes[0].bbox.maxX,
+    minY: shapes[0].bbox.minY,
+    maxY: shapes[0].bbox.maxY,
+    minZ: shapes[0].bbox.minZ ?? 0,
+    maxZ: shapes[0].bbox.maxZ ?? 0
+  };
+
+  // 2. Perform the reduction
+  return shapes.reduce((acc, s) => {
+    const b = s.bbox;
+    const bzMin = b.minZ ?? 0;
+    const bzMax = b.maxZ ?? 0;
+
     if (this.type === 'intersection') {
-      return shapes.reduce((acc, s) => ({
-        minX: Math.max(acc.minX, s.bbox.minX), maxX: Math.min(acc.maxX, s.bbox.maxX),
-        minY: Math.max(acc.minY, s.bbox.minY), maxY: Math.min(acc.maxY, s.bbox.maxY),
-        minZ: Math.max(acc.minZ ?? 0, s.bbox.minZ ?? 0), maxZ: Math.min(acc.maxZ ?? 0, s.bbox.maxZ ?? 0)
-      }), shapes[0].bbox);
+      return {
+        minX: Math.max(acc.minX, b.minX),
+        maxX: Math.min(acc.maxX, b.maxX),
+        minY: Math.max(acc.minY, b.minY),
+        maxY: Math.min(acc.maxY, b.maxY),
+        minZ: Math.max(acc.minZ, bzMin),
+        maxZ: Math.min(acc.maxZ, bzMax)
+      };
+    } else {
+      // Union and Difference logic
+      return {
+        minX: Math.min(acc.minX, b.minX),
+        maxX: Math.max(acc.maxX, b.maxX),
+        minY: Math.min(acc.minY, b.minY),
+        maxY: Math.max(acc.maxY, b.maxY),
+        minZ: Math.min(acc.minZ, bzMin),
+        maxZ: Math.max(acc.maxZ, bzMax)
+      };
     }
-    // For Union/Difference, the BBox is the bounding box of the primary/all shapes
-    return shapes.reduce((acc, s) => ({
-      minX: Math.min(acc.minX, s.bbox.minX), maxX: Math.max(acc.maxX, s.bbox.maxX),
-      minY: Math.min(acc.minY, s.bbox.minY), maxY: Math.max(acc.maxY, s.bbox.maxY),
-      minZ: Math.min(acc.minZ ?? 0, s.bbox.minZ ?? 0), maxZ: Math.max(acc.maxZ ?? 0, s.bbox.maxZ ?? 0)
-    }), shapes[0].bbox);
-  }
+  }, initial);
+}
 
   /** @private */
   _calculateVolume() {
