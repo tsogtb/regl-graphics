@@ -18,5 +18,8 @@
     "start": "npm run demo",
     "demo": "npx live-server --open=demo",
     "dev": "npm run demo"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.16"
   }
 }
