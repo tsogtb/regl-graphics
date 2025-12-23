@@ -4,6 +4,8 @@
 
 ![deepfield.js Banner](./assets/deepfield.png)
 
+> **Why Deep Field?**
+> Just as the Hubble telescope revealed thousands of galaxies in a tiny, seemingly empty patch of sky, `deepfield.js` reveals complex volumes through the accumulation of millions of discrete points.
 ---
 
 ## 🚀 Performance
