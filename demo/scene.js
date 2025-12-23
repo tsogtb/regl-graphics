@@ -1,5 +1,5 @@
-import { Sphere3D } from "./shapes/shapes3d.js";
-import { sampleIntersection, sampleUnion } from "./shapes/composite_shapes.js";
+import { Sphere3D } from "../src/shapes3d.js";
+import { sampleIntersection, sampleUnion } from "../src/composite_shapes.js";
 
 const myDemoSphere1 = new Sphere3D({ x: 2, y: 0, z: 0 }, 4)
 const myDemoSphere2 = new Sphere3D({ x: -2, y: 0, z: 0 }, 4)

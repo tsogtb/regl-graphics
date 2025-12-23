@@ -1,0 +1,17 @@
+{
+  "name": "deepfield.js",
+  "version": "1.0.0",
+  "description": "Monte Carlo sampling library inspired by HUDF",
+  "type": "module",
+  "main": "src/index.js",
+  "keywords": [
+    "monte-carlo",
+    "geometry",
+    "sampling",
+    "point-cloud",
+    "regl",
+    "hudf"
+  ],
+  "author": "Tsogt Baigalmaa",
+  "license": "MIT"
+}
