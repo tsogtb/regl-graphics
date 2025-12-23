@@ -12,7 +12,16 @@ import { SCENES, getSceneConfig } from "./scene.js";
 
 // ---------------- Canvas & REGL ----------------
 const canvas = document.getElementById("c");
-const regl = createREGL({ canvas, attributes: { antialias:true, alpha:false, powerPreference:"high-performance" }});
+const regl = createREGL({ 
+  canvas, 
+  attributes: { 
+    antialias: true, 
+    alpha: false, 
+    powerPreference: "high-performance"
+  },
+  // Use the screen's density but don't go over 2.0 to save the GPU
+  pixelRatio: Math.min(window.devicePixelRatio, 2.0) 
+});
 
 function resizeCanvas() {
   const dpr = window.devicePixelRatio || 1;
@@ -59,4 +68,39 @@ regl.frame(({ time }) => {
   regl.clear({ color: [0.02,0.02,0.02,1], depth: 1 });
 
   render(camera, time);
+});
+
+//----------------- Screenshot ----------------
+
+window.addEventListener('keydown', (e) => {
+  if (e.key.toLowerCase() === 'j') {
+    const canvas = document.getElementById("c");
+    
+    // Check if the drawing buffer is preserved
+    const attributes = regl._gl.getContextAttributes();
+    
+    if (!attributes.preserveDrawingBuffer) {
+      console.warn(
+        "⚠️ Screenshot Failed: 'preserveDrawingBuffer' is currently false.\n" +
+        "To take screenshots, set { attributes: { preserveDrawingBuffer: true } } in the regl constructor."
+      );
+      alert("Screenshot failed. Check the console for instructions!");
+      return;
+    }
+
+    try {
+      const dataURL = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.download = `deepfield_${Date.now()}.png`;
+      link.href = dataURL;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      console.log("🌌 Galaxy captured!");
+    } catch (err) {
+      console.error("Capture failed:", err);
+    }
+  }
 });

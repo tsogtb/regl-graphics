@@ -2,7 +2,7 @@
  * point_data.js
  */
 
-const DEFAULT_PASSIVE_COUNT = 1000000;
+const DEFAULT_PASSIVE_COUNT = 2000000;
 
 const STAR_PALETTE = [
   [1.0, 0.85, 0.7],
