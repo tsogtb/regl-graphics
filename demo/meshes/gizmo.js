@@ -10,7 +10,7 @@ const CONE_RADIUS = 0.075;
 const CONE_HEIGHT = 0.15;
 
 
-const STEM_LENGTH = 0.45;
+const STEM_LENGTH = 0.60;
 
 export const GIZMO_DATA = (() => {
   const geoPos = [];
@@ -50,14 +50,14 @@ export const GIZMO_DATA = (() => {
     }
 
     const outerCone = new Cone3D(
-      { x: 0, y: 0, z: STEM_LENGTH - CONE_HEIGHT }, 
+      { x: 0, y: 0, z: STEM_LENGTH - 2 * CONE_HEIGHT }, 
       CONE_RADIUS, 
       CONE_HEIGHT
     );
 
     const thickness = 0.001; 
     const innerCone = new Cone3D(
-      { x: 0, y: 0, z: STEM_LENGTH - CONE_HEIGHT }, 
+      { x: 0, y: 0, z: STEM_LENGTH - 2.02 * CONE_HEIGHT }, 
       CONE_RADIUS - thickness, 
       CONE_HEIGHT - thickness
     );
@@ -75,7 +75,7 @@ export const GIZMO_DATA = (() => {
     }
 
     const sizeMultiplier = (axis.name === 'x' || axis.name === 'y') ? 0.15 : 0.3;
-    const labelPadding = 0.15; 
+    const labelPadding = 0.0; 
     const anchor = [
       axis.dir[0] * (STEM_LENGTH + labelPadding), 
       axis.dir[1] * (STEM_LENGTH + labelPadding), 
