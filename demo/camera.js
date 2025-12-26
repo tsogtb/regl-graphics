@@ -11,8 +11,18 @@ export class Camera {
     this.projection = mat4.create()
     this.view = mat4.create()
 
-    this.position = vec3.fromValues(0, 0, 0)
-    this.orientation = quat.create() // quaternion rotation
+    this.position = vec3.fromValues(3, 0, 20)
+
+    const lookAtMatrix = mat4.create();
+    const origin = vec3.fromValues(0, 0, 0);
+    const worldUp = vec3.fromValues(0, 1, 0);
+
+    mat4.lookAt(lookAtMatrix, this.position, origin, worldUp);
+
+    this.orientation = quat.create();
+    mat4.getRotation(this.orientation, lookAtMatrix);
+
+    quat.invert(this.orientation, this.orientation);
 
     this.speed = 30.0
     this.mouseSensitivity = 0.002
@@ -21,8 +31,12 @@ export class Camera {
     this._initialPosition = vec3.clone(this.position)
     this._initialOrientation = quat.clone(this.orientation)
 
+    this.isReturning = false;
+    this.returnSpeed = 5.0;
+
     this._initMouse()
     this.updateProjection()
+    this.updateView()
     window.addEventListener("resize", () => this.updateProjection())
 
     this.overlay = document.getElementById("camera-overlay")
@@ -80,6 +94,26 @@ export class Camera {
   }
 
   update(dt) {
+
+    if (keys.has("KeyO")) {
+      this.isReturning = true;
+    }
+  
+    if (this.isReturning) {
+      vec3.lerp(this.position, this.position, this._initialPosition, this.returnSpeed * dt);
+      quat.slerp(this.orientation, this.orientation, this._initialOrientation, this.returnSpeed * dt);
+      const dist = vec3.distance(this.position, this._initialPosition);
+      if (dist < 0.01) {
+        vec3.copy(this.position, this._initialPosition);
+        quat.copy(this.orientation, this._initialOrientation);
+        this.isReturning = false;
+      }
+    }
+
+    if (keys.has("KeyW") || keys.has("KeyS") || keys.has("KeyA") || keys.has("KeyD") || keys.has("Space") || keys.has("ShiftLeft") || keys.has("ShiftRight")) {
+      this.isReturning = false;
+    }
+
     const forward = vec3.fromValues(0, 0, -1)
     const right = vec3.fromValues(1, 0, 0)
     const up = vec3.fromValues(0, 1, 0)
@@ -183,6 +217,7 @@ export class Camera {
             <span>[W/S] • FWD/BACK</span> <span>[Q/E] • ROLL</span>
             <span>[A/D] • STRAFE</span> <span>[SPC/SHIFT] • UP/DWN</span>
             <span>[R] • RECOVER HZN</span> <span>[MOUSE] • PITCH/YAW</span>
+            <span>[O] • RETURN CTR</span>
           </div>
         </div>
       </div>

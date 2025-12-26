@@ -11,6 +11,13 @@ export class CompositeShape {
 
     // Standard properties
     this.bbox = this._calculateBBox();
+
+    this.center = {
+      x: (this.bbox.minX + this.bbox.maxX) / 2,
+      y: (this.bbox.minY + this.bbox.maxY) / 2,
+      z: (this.bbox.minZ + this.bbox.maxZ) / 2
+    };
+
     this.volume = this._calculateVolume();
     this.area = this.volume; 
   }

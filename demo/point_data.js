@@ -1,4 +1,30 @@
-const DEFAULT_PASSIVE_COUNT = 100000;
+import { Path1D } from "../src/curves1d.js"; 
+
+const PASSIVE_STARS_COUNT = 10000;
+const POINTS_FOR_CUBE = 3000; 
+const s = 5; 
+
+const cubeSegments = [
+  
+  { start: {x:-s, y:-s, z:-s}, end: {x: s, y:-s, z:-s} },
+  { start: {x: s, y:-s, z:-s}, end: {x: s, y: s, z:-s} },
+  { start: {x: s, y: s, z:-s}, end: {x:-s, y: s, z:-s} },
+  { start: {x:-s, y: s, z:-s}, end: {x:-s, y:-s, z:-s} },
+  
+  { start: {x:-s, y:-s, z: s}, end: {x: s, y:-s, z: s} },
+  { start: {x: s, y:-s, z: s}, end: {x: s, y: s, z: s} },
+  { start: {x: s, y: s, z: s}, end: {x:-s, y: s, z: s} },
+  { start: {x:-s, y: s, z: s}, end: {x:-s, y:-s, z: s} },
+  
+  { start: {x:-s, y:-s, z:-s}, end: {x:-s, y:-s, z: s} },
+  { start: {x: s, y:-s, z:-s}, end: {x: s, y:-s, z: s} },
+  { start: {x: s, y: s, z:-s}, end: {x: s, y: s, z: s} },
+  { start: {x:-s, y: s, z:-s}, end: {x:-s, y: s, z: s} },
+];
+
+const cubePath = new Path1D(cubeSegments);
+
+
 
 const STAR_PALETTE = [
   [1.0, 0.85, 0.7],
@@ -12,17 +38,18 @@ const getRandomColor = () => STAR_PALETTE[Math.floor(Math.random() * STAR_PALETT
 
 const getGalaxyRadius = () => (
   Math.random() > 0.2 
-    ? 50 + Math.random() * 100 
-    : 3 + Math.random() * 50
+    ? 40 + Math.random() * 20 
+    : 30 + Math.random() * 10
 );
 
 
 function fillPassivePoints(positions, colors) {
-  const count = positions.length / 3;
+  const totalPoints = positions.length / 3;
+  const starCount = Math.max(0, totalPoints - POINTS_FOR_CUBE);
 
-  for (let i = 0; i < count; i++) {
+  // 1. Stars (Galaxy)
+  for (let i = 0; i < starCount; i++) {
     const idx = i * 3;
-    
     const theta = Math.random() * 2 * Math.PI;
     const phi = Math.acos(2 * Math.random() - 1);
     const r = getGalaxyRadius();
@@ -33,10 +60,25 @@ function fillPassivePoints(positions, colors) {
 
     const [rc, gc, bc] = getRandomColor();
     const brightness = 0.4 + Math.random() * 0.6;
-
-    colors[idx]     = rc * brightness;
-    colors[idx + 1] = gc * brightness;
+    colors[idx] = rc * brightness; 
+    colors[idx + 1] = gc * brightness; 
     colors[idx + 2] = bc * brightness;
+  }
+
+  // 2. Cube Edges
+  let currentOffset = starCount;
+  for (let j = 0; j < POINTS_FOR_CUBE; j++) {
+    const { x, y, z } = cubePath.sample();
+    const idx = (currentOffset + j) * 3;
+    
+    positions[idx]     = x;
+    positions[idx + 1] = y;
+    positions[idx + 2] = z;
+    
+    // Soft cyan/white for the boundary
+    colors[idx]     = 0.5; 
+    colors[idx + 1] = 0.6; 
+    colors[idx + 2] = 0.7;
   }
 }
 
@@ -51,7 +93,7 @@ export function createPointData(regl, {
   let positions, colors;
 
   if (passive) {
-    totalPoints = DEFAULT_PASSIVE_COUNT;
+    totalPoints = PASSIVE_STARS_COUNT + POINTS_FOR_CUBE;
     positions = new Float32Array(totalPoints * 3);
     colors = new Float32Array(totalPoints * 3);
     

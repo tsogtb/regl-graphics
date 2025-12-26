@@ -88,7 +88,7 @@ function createGizmoGroup(regl) {
   };
 }
 
-export function createPointRenderer(regl, pointData) {
+export function createPointRenderer(regl, pointData, passivePointData) {
   const globalScope = regl({
     uniforms: {
       uTime: regl.prop("uTime"),
@@ -126,6 +126,8 @@ export function createPointRenderer(regl, pointData) {
     primitive: "points",
   });
 
+  const drawPassiveStars = createPointCommand(CIRCLE);
+
   const brushes = {
     basic:  createPointCommand(BASIC),
     circle: createPointCommand(CIRCLE),
@@ -139,6 +141,14 @@ export function createPointRenderer(regl, pointData) {
     globalScope({ uTime: time }, () => {
       
       drawBackground({ colorTop: [0, 0, 0], colorBottom: [0, 0, 0] });
+
+      drawPassiveStars({
+        projection: camera.projection,
+        view: camera.view,
+        position: passivePointData.buffer,
+        color: passivePointData.colorBuffer,
+        count: passivePointData.count
+      });
 
       const draw = brushes[brushType] || brushes.basic;
       draw({

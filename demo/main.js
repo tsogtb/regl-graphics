@@ -8,7 +8,7 @@ import createREGL from "https://esm.sh/regl";
 import { Camera } from "./camera.js";
 import { createPointData } from "./point_data.js";
 import { createPointRenderer } from "./renderer.js";
-import { SCENES, getSceneConfig } from "./scene.js";
+import { SCENES, getSceneConfig } from "./scene_manager.js";
 
 // ---------------- Canvas & REGL ----------------
 const canvas = document.getElementById("c");
@@ -38,8 +38,9 @@ const camera = new Camera(canvas);
 
 // ---------------- Scene & Renderer ----------------
 let currentSceneIndex = 0;
+let passiveData = createPointData(regl, { passive: true })
 let pointData = createPointData(regl, getSceneConfig(currentSceneIndex).config);
-let render = createPointRenderer(regl, pointData);
+let render = createPointRenderer(regl, pointData, passiveData);
 
 
 function loadScene(index) {
@@ -55,7 +56,7 @@ function loadScene(index) {
   if (sceneInfo.brush) currentBrush = sceneInfo.brush;
 
   pointData = createPointData(regl, config);
-  render = createPointRenderer(regl, pointData);
+  render = createPointRenderer(regl, pointData, passiveData);
 }
 
 function goNextScene() {

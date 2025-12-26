@@ -160,24 +160,45 @@ export class Box3D {
  */
 export class Cylinder3D {
   constructor(center, radius=1, height=1, innerRadius=0) {
-    this.center = center; this.radius = radius; this.height = height; this.innerRadius = innerRadius;
+    this.center = center; 
+    this.radius = radius; 
+    this.height = height; 
+    this.innerRadius = innerRadius;
     this.volume = Math.PI * (radius*radius - innerRadius*innerRadius) * height;
     this.rSq = radius * radius;
     this.irSq = innerRadius * innerRadius;
+
+    const halfH = height / 2;
+    this.bbox = {
+      minX: center.x - radius, maxX: center.x + radius,
+      minY: center.y - radius, maxY: center.y + radius,
+      minZ: center.z - halfH,  maxZ: center.z + halfH
+    };
   }
+
   contains(p, epsilon=1e-9) {
+    
     const dz = p.z - this.center.z;
-    if (dz < -epsilon || dz > this.height + epsilon) return false;
-    const d2 = (p.x-this.center.x)**2 + (p.y-this.center.y)**2;
+    const halfH = this.height / 2;
+    if (Math.abs(dz) > halfH + epsilon) return false;
+
+    const d2 = (p.x - this.center.x)**2 + (p.y - this.center.y)**2;
     return d2 <= this.rSq + epsilon && d2 >= this.irSq - epsilon;
   }
+
   sample() {
     const r = Math.sqrt(Math.random() * (this.rSq - this.irSq) + this.irSq);
     const t = Math.random() * 2 * Math.PI;
-    return { x: this.center.x + r*Math.cos(t), y: this.center.y + r*Math.sin(t), z: this.center.z + Math.random()*this.height };
+    
+    const z = this.center.z + (Math.random() - 0.5) * this.height;
+    
+    return { 
+      x: this.center.x + r * Math.cos(t), 
+      y: this.center.y + r * Math.sin(t), 
+      z: z 
+    };
   }
 }
-
 /**
  * Cone3D
  */
@@ -186,18 +207,20 @@ export class Cone3D {
    * @param {{x,y,z}} center - Center of the circular base
    * @param {number} radius - Base outer radius
    * @param {number} height - Distance from base to tip along +Z
-   * @param {number} innerRadius - Base inner radius for hollow cones
+   * @param {number} innerRadius - Base inner radius
+   * @param {number} [innerHeight] - Height of the internal void. Defaults to outer height.
    */
-  constructor(center, radius = 1, height = 1, innerRadius = 0) {
+  constructor(center, radius = 1, height = 1, innerRadius = 0, innerHeight = null) {
     this.center = center;
     this.radius = radius; 
-    this.innerRadius = innerRadius;
     this.height = height;
+    this.innerRadius = innerRadius;
+    // If not provided, "shared tip" cone
+    this.innerHeight = innerHeight !== null ? innerHeight : (innerRadius > 0 ? height : 0);
 
-    this.volume = (1 / 3) * Math.PI * height * (radius * radius - innerRadius * innerRadius);
-
-    this.rSq = radius * radius;
-    this.irSq = innerRadius * innerRadius;
+    const outerVol = (1 / 3) * Math.PI * (radius ** 2) * height;
+    const innerVol = (1 / 3) * Math.PI * (innerRadius ** 2) * this.innerHeight;
+    this.volume = outerVol - innerVol;
 
     this.bbox = {
       minX: center.x - radius, maxX: center.x + radius,
@@ -210,22 +233,48 @@ export class Cone3D {
     const dz = p.z - this.center.z;
     if (dz < -epsilon || dz > this.height + epsilon) return false;
 
-    const t = 1 - (dz / this.height);
-    const currentOuterRSq = this.rSq * (t * t);
-    const currentInnerRSq = this.irSq * (t * t);
-
+    const outerRAtZ = (this.radius / this.height) * (this.height - dz);
     const dx = p.x - this.center.x;
     const dy = p.y - this.center.y;
     const d2 = dx * dx + dy * dy;
 
-    return d2 <= currentOuterRSq + epsilon && d2 >= currentInnerRSq - epsilon;
+    if (d2 > (outerRAtZ + epsilon) ** 2) return false;
+
+    if (this.innerRadius > 0 && dz <= this.innerHeight + epsilon) {
+      const innerRAtZ = (this.innerRadius / this.innerHeight) * (this.innerHeight - dz);
+      if (d2 < (innerRAtZ - epsilon) ** 2) return false;
+    }
+
+    return true;
   }
 
   sample() {
+    if (this.innerRadius <= 0) {
+      return this._sampleOuter();
+    }
+
+    let attempts = 0;
+    while (attempts < 2000) {
+      const p = this._sampleOuter();
+      const dz = p.z - this.center.z;
+
+      if (dz > this.innerHeight) return p;
+
+      const innerRAtZ = (this.innerRadius / this.innerHeight) * (this.innerHeight - dz);
+      const d2 = (p.x - this.center.x)**2 + (p.y - this.center.y)**2;
+      
+      if (d2 >= innerRAtZ * innerRAtZ) return p;
+      attempts++;
+    }
+    return this._sampleOuter(); 
+  }
+
+  /** @private */
+  _sampleOuter() {
     const u = Math.random();
     const t = Math.cbrt(u);
     const z = this.center.z + (1 - t) * this.height;
-    const r = t * Math.sqrt(Math.random() * (this.rSq - this.irSq) + this.irSq);
+    const r = t * this.radius * Math.sqrt(Math.random());
     const theta = Math.random() * 2 * Math.PI;
 
     return {

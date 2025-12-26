@@ -74,7 +74,7 @@ export const GIZMO_DATA = (() => {
       geoCol.push(axis.color);
     }
 
-    const sizeMultiplier = (axis.name === 'x' || axis.name === 'y') ? 0.15 : 0.3;
+    const sizeMultiplier = (axis.name === 'x' || axis.name === 'y') ? 0.17 : 0.3;
     const labelPadding = 0.0; 
     const anchor = [
       axis.dir[0] * (STEM_LENGTH + labelPadding), 
