@@ -132,7 +132,7 @@ const giftBoxRotated_1 = new RotatedShape(giftBox_1, 0, 0, 0)
 const giftEdges_1 = new Path1D(createBoxWireframe({ x: 0, y: -4.375, z: 3.5 }, 1.25, 1.25, 1.25));
 const giftEdgesRotated_1 = new RotatedShape(giftEdges_1, 0, 0, 0);
 
-const giftBoxTop_1 = new Rectangle2D({x: 0, y: -3.775, z: 3.5 }, 1.25, 1.25);
+const giftBoxTop_1 = new Rectangle2D({x: 0, y: -3.725, z: 3.5 }, 1.25, 1.25);
 const giftBoxTopRotated_1 = new RotatedShape(giftBoxTop_1, Math.PI / 2, 0, 0);
 
 
@@ -162,7 +162,7 @@ export const christmasTreeConfig = {
       //() => spiralVerticalRotatedBlue.sample()
     ],
     counts: [
-      30000,
+      50000,
       7000, 
       300, 
       3000,
@@ -180,7 +180,7 @@ export const christmasTreeConfig = {
       2500,
       1500,
       7000,
-      //7000
+      
     ],
     sceneColors: [
       [0.1, 0.8, 0.2], // Green
@@ -203,5 +203,35 @@ export const christmasTreeConfig = {
       [1.0, 0.1, 0.1], // Red
       //[0.15, 0.25, 0.65], 
     ]
+  },
+  animate: (pointData, time, mat4) => {
+    pointData.forEach((obj) => {
+      mat4.identity(obj.modelMatrix);
+
+      // 1. All tree parts rotate together
+      mat4.rotateY(obj.modelMatrix, obj.modelMatrix, time * 0.2);
+
+      
+      //obj.modelMatrix[4] = Math.sin(time) * 0.2;
+
+      // 2. Target specific parts by their index in the 'samplers' array
+      // obj.id corresponds to the index in your samplers list.
+      
+      // Index 2 is starShape, Index 16 is starWireframe
+      if (obj.id === 2 || obj.id === 16) {
+        mat4.translate(obj.modelMatrix, obj.modelMatrix, [0, Math.sin(time * 2.0) * 0.1, 0]);
+        //mat4.rotateY(obj.modelMatrix, obj.modelMatrix, time * 0.4);
+      }
+
+      /*
+      // Indices 7-15 are the gift boxes
+      if (obj.id >= 7 && obj.id <= 15) {
+        // Maybe make the gifts pulse slightly?
+        const s = 1.0 + Math.sin(time * 3.0) * 0.02;
+        mat4.scale(obj.modelMatrix, obj.modelMatrix, [s, s, s]);
+      }
+      */
+    });
   }
 };
+

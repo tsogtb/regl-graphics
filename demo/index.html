@@ -2,7 +2,7 @@
 (c) 2025 Tsogt
 This code is licensed under the MIT License.
 Created: 12/20/2025
-Last modified: 12/26/2025
+Last modified: 12/27/2025
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -29,7 +29,8 @@ Last modified: 12/26/2025
             height: 100%;
             overflow: hidden;
             background-color: #050505; /* Slightly off-black for depth */
-            touch-action: none; 
+            touch-action: none;
+            user-select: none; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
 
@@ -40,23 +41,35 @@ Last modified: 12/26/2025
             outline: none;
         }
 
-        /* Keyboard Shortcut Hint */
+        /* Keyboard & Credit Hint */
         .hint {
-          position: fixed;
-          bottom: 24px;
-          left: 24px;
-          color: rgba(255, 255, 255, 0.4); /* Lower opacity */
-          font-size: 10px;
-          pointer-events: none;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          transition: opacity 1s ease;
+            position: fixed;
+            bottom: 20px;       /* Increased for better air gap from screen edge */
+            left: 20px;         /* Matches the 20px top-left telemetry offset */
+            color: rgba(255, 255, 255, 0.4); 
+            font-size: 10px;
+            pointer-events: none;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-family: monospace; /* Keep it consistent with the telemetry */
+            display: flex;
+            align-items: center;
+        }
+
+        .author-credit {
+            margin-left: 20px;
+            opacity: 0.6;
+            border-left: 1px solid rgba(255, 255, 255, 0.2); /* Use a real line for better spacing */
+            padding-left: 20px;
+            text-transform: none; /* "Developed by Tsogt" looks cleaner in mixed case */
         }
     </style>
 </head>
 <body>
-    <div class="hint">[N] Next • [B] Brush • [J] Snap</div>
-    
+      <div class="hint">
+        [N] Next • [B] Brush • [J] Snap 
+        <span class="author-credit">Developed by Tsogt</span>
+    </div>
     <canvas id="c"></canvas>
 
     <div id="camera-overlay" style="

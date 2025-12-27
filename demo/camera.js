@@ -11,7 +11,7 @@ export class Camera {
     this.projection = mat4.create()
     this.view = mat4.create()
 
-    this.position = vec3.fromValues(3, 0, 20)
+    this.position = vec3.fromValues(10, 0, 15)
 
     const lookAtMatrix = mat4.create();
     const origin = vec3.fromValues(0, 0, 0);
@@ -34,7 +34,7 @@ export class Camera {
     this.isReturning = false;
     this.returnSpeed = 5.0;
 
-    this._initMouse()
+    this._initInput()
     this.updateProjection()
     this.updateView()
     window.addEventListener("resize", () => this.updateProjection())
@@ -54,27 +54,89 @@ export class Camera {
     this.updateView()
   }
 
-  _initMouse() {
-    this.canvas.addEventListener("click", () => this.canvas.requestPointerLock())
-
+  _initInput() {
+    this.canvas.addEventListener("click", () => this.canvas.requestPointerLock());
+  
+    const activePointers = new Map();
+    let lastPinchDist = 0;
+    let lastPinchAngle = 0;
+  
+    this.canvas.addEventListener("pointerdown", (e) => {
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    });
+  
+    this.canvas.addEventListener("pointermove", (e) => {
+      if (!activePointers.has(e.pointerId)) return;
+  
+      const prev = activePointers.get(e.pointerId);
+      const movementX = e.clientX - prev.x;
+      const movementY = e.clientY - prev.y;
+      activePointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  
+      // --- CASE 1: Single Finger Swipe (Rotate) ---
+      if (activePointers.size === 1) {
+        this._rotate(movementX, movementY);
+      } 
+      
+      // --- CASE 2: Two Finger Pinch (Forward/Back & Roll) ---
+      else if (activePointers.size === 2) {
+        const pts = Array.from(activePointers.values());
+        const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+        const angle = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
+  
+        if (lastPinchDist > 0) {
+          // Pinch to Move Forward/Backward
+          const moveDelta = (dist - lastPinchDist) * 0.05; 
+          const forward = vec3.fromValues(0, 0, -1);
+          vec3.transformQuat(forward, forward, this.orientation);
+          vec3.scaleAndAdd(this.position, this.position, forward, moveDelta);
+  
+          // Twist to Roll
+          const rollDelta = angle - lastPinchAngle;
+          const rollQuat = quat.create();
+          quat.setAxisAngle(rollQuat, forward, rollDelta);
+          quat.multiply(this.orientation, rollQuat, this.orientation);
+        }
+        lastPinchDist = dist;
+        lastPinchAngle = angle;
+      }
+    });
+  
+    const endPointer = (e) => {
+      activePointers.delete(e.pointerId);
+      if (activePointers.size < 2) {
+        lastPinchDist = 0;
+        lastPinchAngle = 0;
+      }
+    };
+  
+    this.canvas.addEventListener("pointerup", endPointer);
+    this.canvas.addEventListener("pointercancel", endPointer);
+  
+    // Still support mouse pointer lock
     document.addEventListener("mousemove", (e) => {
-      if (document.pointerLockElement !== this.canvas) return
+      if (document.pointerLockElement === this.canvas) {
+        this._rotate(e.movementX, e.movementY);
+      }
+    });
+  }
 
-      const right = vec3.fromValues(1, 0, 0)
-      const up = vec3.fromValues(0, 1, 0)
-      vec3.transformQuat(right, right, this.orientation)
-      vec3.transformQuat(up, up, this.orientation)
+  // Helper to keep rotation logic consistent
+  _rotate(mX, mY) {
+    const right = vec3.fromValues(1, 0, 0);
+    const up = vec3.fromValues(0, 1, 0);
+    vec3.transformQuat(right, right, this.orientation);
+    vec3.transformQuat(up, up, this.orientation);
 
-      const yawQuat = quat.create()
-      const pitchQuat = quat.create()
+    const yawQuat = quat.create();
+    const pitchQuat = quat.create();
 
-      quat.setAxisAngle(yawQuat, up, -e.movementX * this.mouseSensitivity)
-      quat.setAxisAngle(pitchQuat, right, -e.movementY * this.mouseSensitivity)
+    quat.setAxisAngle(yawQuat, up, -mX * this.mouseSensitivity);
+    quat.setAxisAngle(pitchQuat, right, -mY * this.mouseSensitivity);
 
-      quat.multiply(this.orientation, yawQuat, this.orientation)
-      quat.multiply(this.orientation, pitchQuat, this.orientation)
-      quat.normalize(this.orientation, this.orientation)
-    })
+    quat.multiply(this.orientation, yawQuat, this.orientation);
+    quat.multiply(this.orientation, pitchQuat, this.orientation);
+    quat.normalize(this.orientation, this.orientation);
   }
 
   updateProjection() {
@@ -201,26 +263,17 @@ export class Camera {
     const horizonRotate = -rollDeg;
   
     this.overlay.innerHTML = `
-      <div style="monospace; background: rgba(15, 15, 20, 0.85); padding: 20px; border-radius: 8px; color: white; width: 220px; border: 1px solid #444; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <span style="color:${this.uiColors.x}">X: ${x}</span>
-          <span style="color:${this.uiColors.y}">Y: ${y}</span>
-          <span style="color:${this.uiColors.z}">Z: ${z}</span>
-        </div>
-        
-        <div style="font-size: 0.8em; margin-bottom: 5px; border-bottom: 1px solid #333; pt: 10px;">
-          YAW: ${yawDeg}° | PITCH: ${pitchDeg}° | ROLL: ${horizonRotate}°
-        </div>
-
-        <div style="font-size: 0.75em; color: #aaa; line-height: 1.6;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr;">
-            <span>[W/S] • FWD/BACK</span> <span>[Q/E] • ROLL</span>
-            <span>[A/D] • STRAFE</span> <span>[SPC/SHIFT] • UP/DWN</span>
-            <span>[R] • RECOVER HZN</span> <span>[MOUSE] • PITCH/YAW</span>
-            <span>[O] • RETURN CTR</span>
-          </div>
-        </div>
+    <div style="font-family: monospace; color: rgba(255,255,255,0.5); font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; line-height: 1.5;">
+      <div>POS: <span style="color:${this.uiColors.x}">${x}</span> <span style="color:${this.uiColors.y}">${y}</span> <span style="color:${this.uiColors.z}">${z}</span></div>
+      <div>ROT: ${yawDeg}° / ${pitchDeg}° / ${horizonRotate}°</div>
+      
+      <div style="margin-top: 8px; opacity: 0.3; font-size: 9px; display: grid; grid-template-columns: auto auto; gap: 0 15px;">
+        <span>W/S/A/D • MOVE</span>
+        <span>SPC/SFT • UP/DWN</span>
+        <span>Q/E • ROLL</span>
+        <span>R/O • LEVEL/HOME</span>
       </div>
+    </div>
     `;
   }
   
