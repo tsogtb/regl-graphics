@@ -66,14 +66,19 @@ Last modified: 12/27/2025
 
         #mobile-controls {
         position: fixed;  
-        bottom: 40px;      
+        bottom: 60px;      
         right: 20px;       
         z-index: 2000;      
         display: flex;      
         gap: 10px;         
-    }
+        }
+        @media (pointer: fine) {
+          #mobile-controls {
+              display: none;
+          }
+        }
         #mobile-controls button {
-        background-color: rgba(0, 0, 0, 0.3); /* semi-transparent like hint overlay */
+        background-color: rgba(255, 255, 255, 0.3); /* semi-transparent like hint overlay */
         color: rgba(255, 255, 255, 0.8);
         border: none;
         border-radius: 2px;
@@ -85,7 +90,7 @@ Last modified: 12/27/2025
         }
 
         #mobile-controls button:hover {
-            background: rgba(255, 255, 255, 0.1); /* subtle hover highlight */
+            background: rgba(0, 0, 0, 0.1); /* subtle hover highlight */
         }
     </style>
 </head>
