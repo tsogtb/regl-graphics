@@ -61,8 +61,17 @@ Last modified: 12/27/2025
             opacity: 0.6;
             border-left: 1px solid rgba(255, 255, 255, 0.2); /* Use a real line for better spacing */
             padding-left: 20px;
-            text-transform: none; /* "Developed by Tsogt" looks cleaner in mixed case */
+            text-transform: none; 
         }
+
+        #mobile-controls {
+        position: fixed;  
+        bottom: 20px;      
+        right: 20px;       
+        z-index: 2000;      
+        display: flex;      
+        gap: 10px;         
+    }
         #mobile-controls button {
         background-color: rgba(0, 0, 0, 0.3); /* semi-transparent like hint overlay */
         color: rgba(255, 255, 255, 0.8);
