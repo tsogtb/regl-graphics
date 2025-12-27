@@ -1,5 +1,5 @@
 import { mat4 } from "https://esm.sh/gl-matrix";
-import { Path1D } from "../src/curves1d.js"; 
+import { Path1D } from "./src/curves1d.js"; 
 
 
 function createEnglishGreeting(offset, scale = 0.5) {

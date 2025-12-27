@@ -1,6 +1,6 @@
-import { Path1D } from "../../src/curves1d.js";
-import { Cone3D } from "../../src/shapes3d.js"; 
-import { CompositeShape } from "../../src/composite_shapes.js";
+import { Path1D } from "../src/curves1d.js";
+import { Cone3D } from "../src/shapes3d.js"; 
+import { CompositeShape } from "../src/composite_shapes.js";
 
 const LETTER_POINTS = 50; 
 const POINTS_PER_CONE = 350; 
