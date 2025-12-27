@@ -63,6 +63,21 @@ Last modified: 12/27/2025
             padding-left: 20px;
             text-transform: none; /* "Developed by Tsogt" looks cleaner in mixed case */
         }
+        #mobile-controls button {
+        background-color: rgba(0, 0, 0, 0.3); /* semi-transparent like hint overlay */
+        color: rgba(255, 255, 255, 0.8);
+        border: none;
+        border-radius: 2px;
+        padding: 6px 10px;
+        font-family: monospace;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+        }
+
+        #mobile-controls button:hover {
+            background: rgba(255, 255, 255, 0.1); /* subtle hover highlight */
+        }
     </style>
 </head>
 <body>
@@ -84,6 +99,12 @@ Last modified: 12/27/2025
     pointer-events: none; /* Allows to click through it */
     z-index: 1000;
     "></div>
+
+    <div id="mobile-controls">
+      <button id="btn-level">Level</button>
+      <button id="btn-home">Home</button>
+    </div>
+  
 
     <script type="module" src="main.js"></script>
     <script>

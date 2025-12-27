@@ -37,6 +37,20 @@ resizeCanvas();
 // ---------------- Camera ----------------
 const camera = new Camera(canvas);
 
+// Level the camera (like pressing "R")
+document.getElementById("btn-level").addEventListener("click", () => {
+  camera.isLeveling = true; // optional flag if you want smooth leveling over multiple frames
+  const dt = 0.016; // 60fps frame
+  keys.add("KeyR");
+  camera.update(dt);
+  keys.delete("KeyR");
+});
+
+// Return home (like pressing "O")
+document.getElementById("btn-home").addEventListener("click", () => {
+  camera.isReturning = true; // camera.update() will handle smooth return
+});
+
 // ---------------- Scene & Renderer ----------------
 let currentSceneIndex = 0;
 let currentBrush = 'star'; 
