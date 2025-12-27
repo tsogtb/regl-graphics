@@ -120,8 +120,8 @@ const getRandomColor = () => STAR_PALETTE[Math.floor(Math.random() * STAR_PALETT
 
 const getGalaxyRadius = () => (
   Math.random() > 0.2 
-    ? 25 + Math.random() * 5 
-    : 30 + Math.random() * 10
+    ? 40 + Math.random() * 10 
+    : 50 + Math.random() * 20
 );
 
 

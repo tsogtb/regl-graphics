@@ -11,7 +11,7 @@ export class Camera {
     this.projection = mat4.create()
     this.view = mat4.create()
 
-    this.position = vec3.fromValues(10, 0, 15)
+    this.position = vec3.fromValues(18, 0, 27)
 
     const lookAtMatrix = mat4.create();
     const origin = vec3.fromValues(0, 0, 0);
