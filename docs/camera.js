@@ -94,7 +94,7 @@ export class Camera {
           // Twist to Roll
           const rollDelta = angle - lastPinchAngle;
           const rollQuat = quat.create();
-          quat.setAxisAngle(rollQuat, forward, rollDelta);
+          quat.setAxisAngle(rollQuat, forward, -rollDelta);
           quat.multiply(this.orientation, rollQuat, this.orientation);
         }
         lastPinchDist = dist;
@@ -131,8 +131,8 @@ export class Camera {
     const yawQuat = quat.create();
     const pitchQuat = quat.create();
 
-    quat.setAxisAngle(yawQuat, up, -mX * this.mouseSensitivity);
-    quat.setAxisAngle(pitchQuat, right, -mY * this.mouseSensitivity);
+    quat.setAxisAngle(yawQuat, up, mX * this.mouseSensitivity);
+    quat.setAxisAngle(pitchQuat, right, mY * this.mouseSensitivity);
 
     quat.multiply(this.orientation, yawQuat, this.orientation);
     quat.multiply(this.orientation, pitchQuat, this.orientation);
