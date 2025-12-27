@@ -3,7 +3,7 @@ export default `
 precision mediump float;
 attribute vec3 position, color;
 uniform mat4 projection, view;
-uniform float uTime; 
+uniform float uTime, uBass; 
 varying vec3 vColor;
 varying float vSizeFactor; 
 varying float vRotation; 

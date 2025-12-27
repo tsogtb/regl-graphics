@@ -9,6 +9,7 @@ import { Camera } from "./camera.js";
 import { createPointData } from "./point_data.js";
 import { createPointRenderer } from "./renderer.js";
 import { SCENES, getSceneConfig } from "./scene_manager.js";
+import { AudioProcessor } from "./audio_processor.js";
 
 // ---------------- Canvas & REGL ----------------
 const canvas = document.getElementById("c");
@@ -84,17 +85,72 @@ window.addEventListener("keydown", (e) => {
   }
 });
 
+const audio = document.getElementById('myAudio');
+const playBtn = document.getElementById('btn-play');
+
+const audioProcessor = new AudioProcessor();
+
+playBtn.addEventListener('click', async () => {
+  console.log("Button clicked!");
+
+  try {
+    // Initialize context if needed
+    if (!audioProcessor.context) {
+      console.log("Initializing context...");
+      audioProcessor.init();
+    }
+
+    // Resume suspended context
+    if (audioProcessor.context.state === 'suspended') {
+      console.log("Resuming suspended context...");
+      await audioProcessor.context.resume();
+    }
+
+    // Connect audio element
+    console.log("Connecting audio element...");
+    audioProcessor.connectAudioElement(audio);
+
+    // Play / pause logic
+    if (audio.paused) {
+      console.log("Attempting to play...");
+      await audio.play(); // await to catch autoplay errors
+      playBtn.innerText = "PAUSE";
+      console.log("Playing successfully!");
+    } else {
+      audio.pause();
+      playBtn.innerText = "PLAY";
+      console.log("Paused.");
+    }
+
+  } catch (err) {
+    console.error("CRITICAL ERROR:", err.message);
+    playBtn.innerText = "ERROR";
+  }
+});
+
+
 // ---------------- Animation Loop ----------------
+let smoothBass = 0;
 let prevTime = 0;
 regl.frame(({ time }) => {
+
   if (!pointData || !pointData.buffer || !pointData.colorBuffer) return; // Don't render if data is missing
   const dt = Math.min(time - prevTime, 0.05);
   prevTime = time;
-
+  
+  const freqData = audioProcessor.getFrequencyData();
+  
+  let targetBass = 0;
+  if (freqData) {
+    targetBass = freqData[0] / 255.0;
+  }
+  
+  smoothBass += (targetBass - smoothBass) * 0.1;
+  
   camera.update(dt);
   regl.clear({ color: [0.02, 0.02, 0.02, 1], depth: 1 });
 
-  render(camera, time, currentBrush);
+  render(camera, time, currentBrush, smoothBass);
 });
 
 
@@ -131,3 +187,4 @@ window.addEventListener('keydown', (e) => {
     }
   }
 });
+

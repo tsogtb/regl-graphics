@@ -52,9 +52,42 @@ Last modified: 12/26/2025
           letter-spacing: 0.15em;
           transition: opacity 1s ease;
         }
+        #music-controls {
+            position: fixed;
+            top: 10px;
+            right: 10px; /* Opposite of your camera overlay */
+            background: rgba(0, 0, 0, 0.6);
+            padding: 10px 15px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-family: monospace;
+            font-size: 11px;
+            color: #fff;
+            z-index: 1000;
+        }
+
+        #btn-play {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 4px 8px;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+
+        #btn-play:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }        
     </style>
 </head>
 <body>
+    <audio id="myAudio" src="/assets/NCS_example.mp3" crossorigin="anonymous"></audio>
+    <div id="music-controls">
+      <span id="track-name">On & On</span>
+      <button id="btn-play">PLAY</button>
+    </div>
     <div class="hint">[N] Next • [B] Brush • [J] Snap</div>
     
     <canvas id="c"></canvas>

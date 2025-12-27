@@ -89,9 +89,13 @@ function createGizmoGroup(regl) {
 }
 
 export function createPointRenderer(regl, pointData, passivePointData) {
+
+  let currentBass = 0;
+  
   const globalScope = regl({
     uniforms: {
       uTime: regl.prop("uTime"),
+      uBass: () => currentBass,
       uAspect: (context) => context.viewportWidth / context.viewportHeight,
       uViewportHeight: (context) => context.viewportHeight,
     }
@@ -137,7 +141,8 @@ export function createPointRenderer(regl, pointData, passivePointData) {
 
   const drawGizmoGroup = createGizmoGroup(regl);
 
-  return function render(camera, time, brushType = 'basic') {
+  return function render(camera, time, brushType = 'basic', audioValue = 0) {
+    currentBass = audioValue;
     globalScope({ uTime: time }, () => {
       
       drawBackground({ colorTop: [0, 0, 0], colorBottom: [0, 0, 0] });
